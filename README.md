@@ -9,10 +9,10 @@ Implementing NeRF model from scratch
   </tr>
   <tr>
     <td>
-      <a href="https://github.com/prajwalsingh/NeRF/blob/main/results/chair.mp4" title="Link Title"></a>
+      <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/chair.gif" />
     </td>
     <td>
-      <a href="https://github.com/prajwalsingh/NeRF/blob/main/results/ship.mp4" title="Link Title"></a>
+      <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/ship.gif" />
     </td>
   </tr>
 </table>
