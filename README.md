@@ -1,11 +1,11 @@
 # NeRF
 Implementing NeRF model from scratch
 
-<table style="text-align: center;">
+<table>
   <tr>
-    <td>Chair</td>
-    <td>Ship</td>
-    <td>Hotdog</td>
+    <td><center>Chair</center></td>
+    <td><center>Ship</center></td>
+    <td><center>Hotdog</center></td>
   </tr>
   <tr>
     <td>
