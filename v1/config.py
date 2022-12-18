@@ -5,15 +5,15 @@ os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]= '0'
 
-train_json_path = 'dataset/nerf_synthetic/ship/transforms_train.json' 
-val_json_path   = 'dataset/nerf_synthetic/ship/transforms_val.json' 
-image_path      = 'dataset/nerf_synthetic/ship'
+train_json_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
+val_json_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
+image_path      = 'dataset/nerf_synthetic/hotdog'
 device       = 'cuda'
 lr           = 5e-4
 image_height = 128
 image_width  = 128
 batch_size   = 1
-epochs       = 1000
+epochs       = 400
 
 pos_enc_dim  = 10
 dir_enc_dim  = 4

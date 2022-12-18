@@ -98,7 +98,7 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	experiment_num = 1
+	experiment_num = 6
 	ckpt_path = 'EXPERIMENT_{}/nerf_base.pth'.format(experiment_num)
 
 	if os.path.isfile(ckpt_path):		
@@ -143,5 +143,5 @@ if __name__ == '__main__':
 			# show(imgs=depth_map[:1], path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
 			rgb_frames = rgb_frames + [ np.uint8(np.clip(rgb[0].detach().cpu().numpy()*255.0, 0, 255)) ]
 
-	rgb_video = "chair.mp4"
+	rgb_video = "ship.mp4"
 	imageio.mimwrite(rgb_video, rgb_frames, fps=30, quality=7, macro_block_size=None)

@@ -97,9 +97,10 @@ if __name__ == '__main__':
 
 	os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
 
-	ckpt_path = 'EXPERIMENT_{}/nerf_base.pth'.format(experiment_num)
+	ckpt_path = 'EXPERIMENT_{}/checkpoints/nerf_1.pth'.format(experiment_num)
 
-	if os.path.isfile(ckpt_path):		
+	if os.path.isfile(ckpt_path):
+		ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 		checkpoint = torch.load(ckpt_path)
 		nerfnet_coarse.load_state_dict(checkpoint['model_state_dict_coarse'])
 		# optimizer_coarse.load_state_dict(checkpoint['optimizer_state_dict_coarse'])
@@ -110,6 +111,8 @@ if __name__ == '__main__':
 		START_EPOCH = checkpoint['epoch']
 		print('Loading checkpoint from previous epoch: {}'.format(START_EPOCH))
 		START_EPOCH += 1
+	else:
+		os.makedirs('EXPERIMENT_{}/checkpoints/'.format(experiment_num))
 	#########################################################################################
 
 	#########################################################################################
@@ -248,7 +251,7 @@ if __name__ == '__main__':
 					'optimizer_state_dict': optimizer.state_dict(),
 					# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
 					# 'scheduler_state_dict': scheduler.state_dict()
-			}, ckpt_path)
+			}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, epoch))
 
 		with open('EXPERIMENT_{}/log.txt'.format(experiment_num), 'a') as file:
 			file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}, VL: {:0.3f}, VPSNR: {:0.3f}\n'.\
