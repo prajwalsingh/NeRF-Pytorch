@@ -1,11 +1,11 @@
 # NeRF
 Implementing NeRF model from scratch
 
-<center>
-<table>
+<table style="text-align: center;">
   <tr>
     <td>Chair</td>
     <td>Ship</td>
+    <td>Hotdog</td>
   </tr>
   <tr>
     <td>
@@ -14,9 +14,11 @@ Implementing NeRF model from scratch
     <td>
       <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/ship.gif" />
     </td>
+    <td>
+      <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/hotdog.gif" />
+    </td>
   </tr>
 </table>
-</center>
 
 #### Work in Progress.
 
