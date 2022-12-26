@@ -280,7 +280,7 @@ if __name__ == '__main__':
 
 				# rgb_coarse = torch.permute(rgb_coarse, (0, 3, 1, 2))
 
-				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(camera_matrix=c2wMatrix, t_vals=t_val_chunk, weights=weights_coarse, idx=idx, chunk_size=config.chunk_size)
+				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(camera_matrix=base_c2wMatrix, t_vals=t_val_chunk, weights=weights_coarse, idx=idx, chunk_size=config.chunk_size)
 
 				prediction   = nerfnet_fine(fine_rays)
 				# prediction   = torch.reshape(prediction,\

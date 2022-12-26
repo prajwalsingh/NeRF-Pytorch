@@ -3,11 +3,11 @@ import math
 
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]= '1'
+os.environ["CUDA_VISIBLE_DEVICES"]= '0'
 
-train_json_path = 'dataset/nerf_synthetic/ship/transforms_train.json' 
-val_json_path   = 'dataset/nerf_synthetic/ship/transforms_val.json' 
-image_path      = 'dataset/nerf_synthetic/ship'
+train_json_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
+val_json_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
+image_path      = 'dataset/nerf_synthetic/hotdog'
 device       = 'cuda'
 lr           = 5e-4
 image_height = 256
