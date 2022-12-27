@@ -93,8 +93,8 @@ class NerfComponents:
 
 		# t_vals = torch.reshape(t_vals, (self.batch_size, -1, self.num_samples))
 		xyz    = torch.unsqueeze(ray_origin, dim=-2) + torch.unsqueeze(t_vals, dim=-1)
-		dirc  = torch.unsqueeze(ray_origin, dim=-2) +\
-				torch.unsqueeze(ray_direction, dim=-2) * torch.unsqueeze(t_vals, dim=-1)
+		dirc   = torch.unsqueeze(ray_origin, dim=-2) +\
+				 torch.unsqueeze(ray_direction, dim=-2) * torch.unsqueeze(t_vals, dim=-1)
 		
 		xyz    = torch.reshape(xyz, (self.batch_size, -1, self.num_samples, 3))
 		xyz    = self.encode_position(xyz, self.pos_enc_dim)

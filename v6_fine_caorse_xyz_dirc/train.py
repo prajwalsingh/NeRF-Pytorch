@@ -182,6 +182,7 @@ if __name__ == '__main__':
 				loss = loss_fn(image_chunk, rgb_coarse) + loss_fn(image_chunk, rgb_fine)
 				# total_loss = total_loss + loss
 				loss.backward()
+				optimizer.step()
 
 				temp_loss_tracker.append(loss.detach().cpu())
 				# train_psnr_tracker.append(psnr(rgb_fine, image).detach().cpu())
@@ -192,7 +193,6 @@ if __name__ == '__main__':
 				del rgb_coarse, depth_map_coarse, weights_coarse, xyz_chunk, dirc_chunk, t_val_chunk, xyz_fine, dirc_fine, t_val_fine, rgb_fine, depth_map_fine, weights_fine, loss, density, rgb
 				# break
 
-			optimizer.step()
 			# tq.set_description('E: {}, TL: {:0.3f}, TPSNR: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker), sum(train_psnr_tracker)/len(train_psnr_tracker)))
 			tq.set_description('E: {}, TL: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker)))
 			# break
