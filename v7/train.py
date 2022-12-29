@@ -271,7 +271,6 @@ if __name__ == '__main__':
 				rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 				rgb_final = (torch.clip(torch.permute(rgb_final, (2, 0, 1)), 0, 1)*255.0).to(torch.uint8)
 				depth_final = torch.concat(depth_final, dim=0).reshape(config.image_height, config.image_width)
-				depth_final = (torch.clip(depth_final, 0, 1)*255.0).to(torch.uint8)
 
 			show(imgs=[rgb_final], path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
 			show(imgs=[depth_final], path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)

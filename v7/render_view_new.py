@@ -98,8 +98,8 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'ship'
-	experiment_num = 4
+	label = 'lego'
+	experiment_num = 116
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if os.path.isfile(ckpt_path):		
@@ -116,49 +116,39 @@ if __name__ == '__main__':
 	#########################################################################################
 
 	for idx, theta in enumerate(tqdm(np.linspace(0.0, 360.0, 120, endpoint=False))):
-		# Camera to world matrix
 		with torch.no_grad():
-			c2w = torch.unsqueeze(spherical_pose(theta, -30.0, 4.0), dim=0)
+			# Camera to world matrix
+			c2w = torch.unsqueeze(spherical_pose(theta, -30.0, 4.0), dim=0).to(config.device)
 
-			rgb_final, depth_final = [], []
-			rays, t_vals     = nerf_comp.sampling_rays(camera_matrix=c2w, random_sampling=True)
+			rgb_final, depth_final = [], []				
+			# image  = torch.permute(base_image, (0, 2, 3, 1))
+			# image  = image.reshape(config.batch_size, -1, 3)
 
-			image  = torch.randn(size=(config.batch_size, config.image_height, config.image_width, 3))
+			ray_origin, ray_direction = nerf_comp.get_rays(c2w)
+			ray_origin_o, ray_direction_o = ray_origin.reshape(config.batch_size, -1, 3),\
+									ray_direction.reshape(config.batch_size, -1, 3)											
 
+			for idx  in range(0, config.image_height*config.image_width, config.n_samples):
 
-			rays, t_vals, image  = nerf_comp.sub_batching(rays, t_vals, image, chunk_size=config.chunk_size)
+				ray_origin, ray_direction = ray_origin_o[:, idx:idx+config.n_samples], ray_direction_o[:, idx:idx+config.n_samples]
+				# ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction)
 
-			for idx, (ray_chunk, t_val_chunk, image_chunk) in enumerate(zip(rays, t_vals, image)):
+				rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, random_sampling=True)
 
-				prediction   = nerfnet_coarse(ray_chunk)
+				prediction   = nerfnet_coarse(rays)
 
-				# prediction   = torch.reshape(prediction,\
-				# 							(config.batch_size,\
-				# 							config.image_height//config.chunk_size,\
-				# 							config.image_width,\
-				# 							config.num_samples,\
-				# 							prediction.shape[-1]))
+				rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(prediction=prediction, rays=rays, t_vals=t_vals, random_sampling=True)
 
-				rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(prediction=prediction, rays=ray_chunk, t_vals=t_val_chunk, random_sampling=True)
-
-				# rgb_coarse = torch.permute(rgb_coarse, (0, 3, 1, 2))
-
-				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(camera_matrix=c2w, t_vals=t_val_chunk, weights=weights_coarse, idx=idx, chunk_size=config.chunk_size)
+				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
 
 				prediction   = nerfnet_fine(fine_rays)
-				# prediction   = torch.reshape(prediction,\
-				# 							(config.batch_size,\
-				# 							config.image_height,\
-				# 							config.image_width,\
-				# 							config.num_samples_fine,\
-				# 							prediction.shape[-1]))
 
 				rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(prediction=prediction, rays=fine_rays, t_vals=t_vals_fine, random_sampling=True)
 
 				rgb_final.append(rgb_fine)
 				depth_final.append(depth_map_fine)
 
-			rgb_final = torch.concat(rgb_final, dim=-2).reshape(config.batch_size, config.image_height, config.image_width, -1)
+			rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 			# rgb_final = torch.permute(rgb_final, (0, 3, 1, 2))
 			# depth_final = torch.concat(depth_final, dim=-2).reshape(config.batch_size, config.image_height, config.image_width)
 
