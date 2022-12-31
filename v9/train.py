@@ -79,6 +79,8 @@ if __name__ == '__main__':
 									list(nerfnet_fine.parameters()),
 									lr=config.lr
 								)
+	scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+
 	loss_fn = torch.nn.MSELoss()
 
 	START_EPOCH = 1
@@ -107,7 +109,7 @@ if __name__ == '__main__':
 		nerfnet_fine.load_state_dict(checkpoint['model_state_dict_fine'])
 		# optimizer_fine.load_state_dict(checkpoint['optimizer_state_dict_fine'])
 		optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-		# scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+		scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 		START_EPOCH = checkpoint['epoch']
 		print('Loading checkpoint from previous epoch: {}'.format(START_EPOCH))
 		START_EPOCH += 1
@@ -294,7 +296,7 @@ if __name__ == '__main__':
 					'model_state_dict_fine': nerfnet_fine.state_dict(),
 					'optimizer_state_dict': optimizer.state_dict(),
 					# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
-					# 'scheduler_state_dict': scheduler.state_dict()
+					'scheduler_state_dict': scheduler.state_dict()
 			}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, epoch))
 
 		with open('EXPERIMENT_{}/log.txt'.format(experiment_num), 'a') as file:
@@ -305,4 +307,5 @@ if __name__ == '__main__':
 			file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}\n'.\
 				format(epoch, sum(train_loss_tracker)/len(train_loss_tracker),\
 				sum(train_psnr_tracker)/len(train_psnr_tracker)))
+		scheduler.step()
 		# #########################################################################################
