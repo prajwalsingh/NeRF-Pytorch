@@ -5,16 +5,17 @@ os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]= '1'
 
-dataset_type    = 'json' # 'json' or 'npy'
+dataset_type    = 'real' # 'synthetic', 'real', 'llff'
 
-train_json_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
-val_json_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
-image_path      = 'dataset/nerf_synthetic/hotdog'
+# train_camera_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
+# val_camera_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
+# train_image_path  = 'dataset/nerf_synthetic/hotdog'
+# val_image_path    = 'dataset/nerf_synthetic/hotdog'
 
 train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
 val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-train_npy_path    = 'dataset/nerf_real_360/vasedeck/images'
-val_npy_path      = 'dataset/nerf_real_360/vasedeck/images'
+train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
+val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
 
 device       = 'cuda'
 lr           = 5e-4

@@ -33,15 +33,15 @@ random.seed(45)
 if __name__ == '__main__':
 	
 	#########################################################################################
-	train_dataloader = DataLoader(NerfDataLoader(camera_path=config.train_json_path,\
-										   data_path=config.image_path,\
+	train_dataloader = DataLoader(NerfDataLoader(camera_path=config.train_camera_path,\
+										   data_path=config.train_image_path,\
 										   imageHeight=config.image_height,\
 										   imageWidth=config.image_width),\
 										   batch_size=config.batch_size, shuffle=True,\
 										   num_workers=8, pin_memory=True, drop_last=False)
 
-	val_dataloader = DataLoader(NerfDataLoader(camera_path=config.val_json_path,\
-										   data_path=config.image_path,\
+	val_dataloader = DataLoader(NerfDataLoader(camera_path=config.val_camera_path,\
+										   data_path=config.val_image_path,\
 										   imageHeight=config.image_height,\
 										   imageWidth=config.image_width),\
 										   batch_size=config.batch_size, shuffle=True,\
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 	if len(dir_info)==0:
 		experiment_num = 1
 	else:
-		experiment_num = int(dir_info[-1].split('_')[-1]) #+ 1
+		experiment_num = int(dir_info[-1].split('_')[-1]) + 1
 
 	if not os.path.isdir('EXPERIMENT_{}'.format(experiment_num)):
 		os.makedirs('EXPERIMENT_{}'.format(experiment_num))

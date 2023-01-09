@@ -61,7 +61,7 @@ class NerfDataLoader(Dataset):
 				self.focal.append(focal_len)
 				self.bounds.append(near_far[idx])
 
-		elif config.dataset_type=='json':
+		elif config.dataset_type=='synthetic':
 			# Reading the JSON data
 			with open(camera_path, 'r') as file:
 				json_data = json.load(file)
