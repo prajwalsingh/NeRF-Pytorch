@@ -47,10 +47,11 @@ if __name__ == '__main__':
 										   batch_size=config.batch_size, shuffle=True,\
 										   num_workers=8, pin_memory=True, drop_last=False)
 	base_image, base_c2wMatrix, base_focal, base_direction, base_near, base_far = next(iter(val_dataloader))
-	base_c2wMatrix, base_direction, base_near, base_far = base_c2wMatrix.to(config.device),\
+	base_c2wMatrix, base_direction, base_near, base_far, base_focal = base_c2wMatrix.to(config.device),\
 															base_direction.to(config.device),\
 															base_near.to(config.device),\
-															base_far.to(config.device)
+															base_far.to(config.device),\
+															base_focal.to(config.device)
 	base_direction = torch.reshape(base_direction, (config.batch_size, -1, 3))
 	# print(image.shape, c2wMatrix.shape)
 	# show(image.to(torch.uint8))
@@ -154,6 +155,7 @@ if __name__ == '__main__':
 				
 				# calculating camera origin and ray direction
 				ray_origin, ray_direction = nerf_comp.get_rays(c2wMatrix, direction)
+				ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, near, far, focal)
 				
 				ray_direction_c  = torch.tile(torch.unsqueeze(torch.squeeze(ray_direction, dim=0), dim=-2), (1, config.num_samples, 1))
 				ray_direction_c  = nerf_comp.encode_position(x=ray_direction_c, enc_dim=config.dir_enc_dim)
@@ -270,6 +272,7 @@ if __name__ == '__main__':
 
 				for idx  in range(0, config.image_height*config.image_width, config.n_samples):
 					ray_origin, ray_direction = nerf_comp.get_rays(base_c2wMatrix, base_direction[:, idx:idx+config.n_samples])
+					ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, base_near, base_far, base_focal)
 					ray_direction_c  = torch.tile(torch.unsqueeze(torch.squeeze(ray_direction, dim=0), dim=-2), (1, config.num_samples, 1))
 					ray_direction_c  = nerf_comp.encode_position(x=ray_direction_c, enc_dim=config.dir_enc_dim)
 					ray_direction_f  = torch.tile(torch.unsqueeze(torch.squeeze(ray_direction, dim=0), dim=-2), (1, config.num_samples_fine, 1))

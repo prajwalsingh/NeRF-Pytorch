@@ -31,6 +31,8 @@ class NerfComponents:
 
 		return torch.concat(positions, dim=-1).to(self.device)
 	
+	# Reference:
+	# https://github.com/bmild/nerf/blob/cf364d90964117a117116ab378ab9fafd04db290/run_nerf_helpers.py#L137
 	def ndc_rays(self, rays_o, rays_d, near, far, focal):
 		"""Normalized device coordinate rays.
 
@@ -49,19 +51,20 @@ class NerfComponents:
 		rays_d: array of shape [batch_size, 3]. Ray direction in NDC.
 		"""
 		# Shift ray origins to near plane
-		t = -(near + rays_o[..., 2]) / rays_d[..., 2]
-		rays_o = rays_o + t[..., None] * rays_d
-
+		t = -(near + rays_o[...,2]) / rays_d[...,2]
+		rays_o = rays_o + t[...,None] * rays_d
+		
 		# Projection
-		o0 = -1./(self.width/(2.*focal)) * rays_o[..., 0] / rays_o[..., 2]
-		o1 = -1./(self.height/(2.*focal)) * rays_o[..., 1] / rays_o[..., 2]
-		o2 = 1. + 2. * near / rays_o[..., 2]
+		o0 = -1./(self.width/(2.*focal)) * rays_o[...,0] / rays_o[...,2]
+		o1 = -1./(self.height/(2.*focal)) * rays_o[...,1] / rays_o[...,2]
+		o2 = 1. + 2. * near / rays_o[...,2]
 
-		d0 = -1./(self.width/(2.*focal)) * \
-			(rays_d[..., 0]/rays_d[..., 2] - rays_o[..., 0]/rays_o[..., 2])
-		d1 = -1./(self.height/(2.*focal)) * \
-			(rays_d[..., 1]/rays_d[..., 2] - rays_o[..., 1]/rays_o[..., 2])
-		d2 = -2. * near / rays_o[..., 2]
+		d0 = -1./(self.width/(2.*focal)) * (rays_d[...,0]/rays_d[...,2] - rays_o[...,0]/rays_o[...,2])
+		d1 = -1./(self.height/(2.*focal)) * (rays_d[...,1]/rays_d[...,2] - rays_o[...,1]/rays_o[...,2])
+		d2 = -2. * near / rays_o[...,2]
+		
+		rays_o = torch.stack([o0,o1,o2], dim=-1)
+		rays_d = torch.stack([d0,d1,d2], dim=-1)
 
 		return rays_o, rays_d
 
