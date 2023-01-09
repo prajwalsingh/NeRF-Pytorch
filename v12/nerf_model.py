@@ -45,7 +45,6 @@ class NerfNet(nn.Module):
 
 		self.density = nn.Sequential(
 						nn.Linear(in_features=net_dim, out_features=1),
-						nn.ReLU(),
 					)
 		# self.density = nn.Linear(in_features=net_dim, out_features=1)
 		self.feature = nn.Sequential(

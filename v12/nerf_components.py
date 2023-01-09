@@ -223,6 +223,13 @@ class NerfComponents:
 
 			delta = torch.unsqueeze(delta, dim=-1)
 
+		noise = 0.0
+
+		if (config.dataset_type == 'real') or (config.dataset_type == 'llff'):
+			noise = torch.normal(mean=0.0, std=1.0, size=(density.shape)).to(config.device)
+
+		density = torch.nn.ReLU()(density+noise)
+
 		alpha = 1.0 - torch.exp(-density * delta)
 
 		# print('alphamin: {}, alphamax: {}'.format(alpha.min(), alpha.max()))
