@@ -2,6 +2,9 @@
 Implementing NeRF model from scratch
 
 <table>
+  <th colspan="3">
+  <center>v1_coarse_fine</center>
+  </th>
   <tr>
     <td><center>Chair</center></td>
     <td><center>Ship</center></td>
@@ -16,6 +19,24 @@ Implementing NeRF model from scratch
     </td>
     <td>
       <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/hotdog.gif" />
+    </td>
+  </tr>
+</table>
+
+<table>
+  <th colspan="3">
+  <center>v11</center>
+  </th>
+  <tr>
+    <td><center>Chair</center></td>
+    <td><center>Ship</center></td>
+    <td><center>Hotdog</center></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td></td>
+    <td>
+      <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/hotdogv11.gif" width="256px" height="256px"/>
     </td>
   </tr>
 </table>
