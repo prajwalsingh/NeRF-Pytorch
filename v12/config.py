@@ -5,19 +5,22 @@ os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]= '1'
 
-dataset_type    = 'synthetic' # 'synthetic', 'real', 'llff'
+dataset_type    = 'real' # 'synthetic', 'real', 'llff'
 
-train_camera_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
-val_camera_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
-train_image_path  = 'dataset/nerf_synthetic/hotdog'
-val_image_path    = 'dataset/nerf_synthetic/hotdog'
+if dataset_type == 'synthetic':
+	train_camera_path = 'dataset/nerf_synthetic/hotdog/transforms_train.json' 
+	val_camera_path   = 'dataset/nerf_synthetic/hotdog/transforms_val.json' 
+	train_image_path  = 'dataset/nerf_synthetic/hotdog'
+	val_image_path    = 'dataset/nerf_synthetic/hotdog'
 
-# train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-# val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-# train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
-# val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
+elif (dataset_type == 'real') or (dataset_type == 'llff'):
+	train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
+	val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
+	train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
+	val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
 
 device       = 'cuda'
+use_ndc      = True
 lr           = 5e-4
 image_height = 512
 image_width  = 512
