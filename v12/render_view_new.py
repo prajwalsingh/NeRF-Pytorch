@@ -63,8 +63,25 @@ if __name__ == '__main__':
 	# jsonPath = 'dataset/nerf_synthetic/ship/transforms_val.json'
 	# with open(jsonPath, 'r') as file:
 	# 	jsonData = json.load(file)
+	focal_len  = 600.0
+	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
+	base_near  = torch.as_tensor([3.3], dtype=torch.float32).to(config.device)
+	base_far   = torch.as_tensor([28.0], dtype=torch.float32).to(config.device)
+	x, y = np.meshgrid(
+							np.arange(0, config.image_width, dtype=np.float32),
+							np.arange(0, config.image_height, dtype=np.float32),
+							indexing = 'xy'
+						)
 
-	focal = torch.as_tensor([800.0], dtype=torch.float32)
+	# Pixel to camera coordinates
+	camera_x = (x - (config.image_width  * 0.5))/focal_len
+	camera_y = (y - (config.image_height * 0.5))/focal_len
+
+	# creating a direction vector and normalizing to unit vector
+	# direction of pixels w.r.t local camera origin (0,0,0)
+	base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)).to(config.device)
+	base_direction = torch.reshape(base_direction, [1, -1, 3])
+
 	rgb_frames = []
 
 	nerfnet_coarse = NerfNet(depth=config.net_depth, in_feat=config.in_feat, dir_feat=config.dir_feat,\
@@ -78,10 +95,7 @@ if __name__ == '__main__':
 
 	nerf_comp = NerfComponents(height=config.image_height,\
 							   width=config.image_width,\
-							   focal=focal.to(config.device),\
 							   batch_size=config.batch_size,\
-							   near=config.near_plane,\
-							   far=config.far_plane,\
 							   num_samples=config.num_samples,\
 							   pos_enc_dim=config.pos_enc_dim,\
 							   dir_enc_dim=config.dir_enc_dim)
@@ -98,8 +112,8 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'hotdog'
-	experiment_num = 1
+	label = 'flowerpot'
+	experiment_num = 4
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if os.path.isfile(ckpt_path):		
@@ -118,26 +132,23 @@ if __name__ == '__main__':
 	for idx, theta in enumerate(tqdm(np.linspace(0.0, 360.0, 120, endpoint=False))):
 		with torch.no_grad():
 			# Camera to world matrix
-			c2w = torch.unsqueeze(spherical_pose(theta, -30.0, 4.0), dim=0).to(config.device)
+			base_c2wMatrix = torch.unsqueeze(spherical_pose(theta, -30.0, 4.0), dim=0).to(config.device)
 
 			rgb_final, depth_final = [], []				
 			# image  = torch.permute(base_image, (0, 2, 3, 1))
 			# image  = image.reshape(config.batch_size, -1, 3)
 
-			ray_origin, ray_direction = nerf_comp.get_rays(c2w)
-			ray_origin_o, ray_direction_o = ray_origin.reshape(config.batch_size, -1, 3),\
-									ray_direction.reshape(config.batch_size, -1, 3)
-
 			for idx  in range(0, config.image_height*config.image_width, config.n_samples):
-
-				ray_origin, ray_direction = ray_origin_o[:, idx:idx+config.n_samples], ray_direction_o[:, idx:idx+config.n_samples]
+				ray_origin, ray_direction = nerf_comp.get_rays(base_c2wMatrix, base_direction[:, idx:idx+config.n_samples])
+				if config.use_ndc:
+					ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, base_near, base_far, base_focal)
 				ray_direction_c  = torch.tile(torch.unsqueeze(torch.squeeze(ray_direction, dim=0), dim=-2), (1, config.num_samples, 1))
 				ray_direction_c  = nerf_comp.encode_position(x=ray_direction_c, enc_dim=config.dir_enc_dim)
 				ray_direction_f  = torch.tile(torch.unsqueeze(torch.squeeze(ray_direction, dim=0), dim=-2), (1, config.num_samples_fine, 1))
 				ray_direction_f  = nerf_comp.encode_position(x=ray_direction_f, enc_dim=config.dir_enc_dim)	
 				# ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction)
 
-				rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, random_sampling=True)
+				rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, near=base_near, far=base_far, random_sampling=True)
 
 				rgb, density   = nerfnet_coarse(rays, ray_direction_c)
 
@@ -154,6 +165,8 @@ if __name__ == '__main__':
 
 				rgb_final.append(rgb_fine)
 				depth_final.append(depth_map_fine)
+
+				del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, ray_direction_c, ray_direction_f, rgb_fine, depth_map_fine, weights_fine
 
 			rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 			# rgb_final = torch.permute(rgb_final, (0, 3, 1, 2))
