@@ -165,7 +165,6 @@ if __name__ == '__main__':
 				view_direction    = torch.unsqueeze(ray_direction / torch.linalg.norm(ray_direction, ord=2, dim=-1, keepdim=True), dim=1)
 				view_direction_c  = nerf_comp.encode_position(torch.tile(view_direction, [1, config.num_samples, 1]), config.dir_enc_dim)
 				view_direction_f  = nerf_comp.encode_position(torch.tile(view_direction, [1, 2*config.num_samples, 1]), config.dir_enc_dim)
-				# ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction)
 
 				rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, near=base_near, far=base_far, random_sampling=True)
 
@@ -173,17 +172,17 @@ if __name__ == '__main__':
 
 				rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, random_sampling=True)
 
-				rgb_final.append(rgb_coarse)
-				depth_final.append(depth_map_coarse)
+				# rgb_final.append(rgb_coarse)
+				# depth_final.append(depth_map_coarse)
 
-				# fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
+				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
 
-				# rgb, density   = nerfnet_fine(fine_rays, ray_direction_f)
+				rgb, density   = nerfnet_fine(fine_rays, ray_direction_f)
 
-				# rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays=fine_rays, t_vals=t_vals_fine, random_sampling=True)
+				rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
 
-				# rgb_final.append(rgb_fine)
-				# depth_final.append(depth_map_fine)
+				rgb_final.append(rgb_fine)
+				depth_final.append(depth_map_fine)
 
 				# del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, rgb_fine, depth_map_fine, weights_fine
 				del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f

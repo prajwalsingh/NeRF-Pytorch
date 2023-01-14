@@ -174,16 +174,16 @@ if __name__ == '__main__':
 
 			rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, random_sampling=True)
 
-			# with torch.no_grad():
-			# 	fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
+			with torch.no_grad():
+				fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
 
-			# rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
+			rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
 			
-			# rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
+			rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
 
-			# loss = torch.mean( torch.square(image - rgb_coarse) ) + torch.mean( torch.square(image - rgb_fine) )
+			loss = torch.mean( torch.square(image - rgb_coarse) ) + torch.mean( torch.square(image - rgb_fine) )
 
-			loss = torch.mean( torch.square(image - rgb_coarse) )
+			# loss = torch.mean( torch.square(image - rgb_coarse) )
 
 			loss.backward()
 			optimizer_coarse.step()
@@ -194,8 +194,8 @@ if __name__ == '__main__':
 			train_loss_tracker.append(sum(temp_loss_tracker)/len(temp_loss_tracker))
 
 			tq.set_description('E: {}, TL: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker)))
-			# del rgb_coarse, depth_map_coarse, weights_coarse, fine_rays, t_vals_fine, rgb, density, rgb_fine, depth_map_fine, weights_fine, loss, view_direction_c, view_direction_f, direction, near, far, ray_origin, view_direction
-			del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, loss, view_direction_c, view_direction_f, view_direction
+			del rgb_coarse, depth_map_coarse, weights_coarse, fine_rays, t_vals_fine, rgb, density, rgb_fine, depth_map_fine, weights_fine, loss, view_direction_c, view_direction_f, direction, near, far, ray_origin, view_direction
+			# del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, loss, view_direction_c, view_direction_f, view_direction
 		# 	# break
 
 		# # tq.set_description('E: {}, TL: {:0.3f}, TPSNR: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker), sum(train_psnr_tracker)/len(train_psnr_tracker)))
@@ -289,19 +289,19 @@ if __name__ == '__main__':
 
 					rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, random_sampling=True)
 
-					rgb_final.append(rgb_coarse)
-					depth_final.append(depth_map_coarse)
+					# rgb_final.append(rgb_coarse)
+					# depth_final.append(depth_map_coarse)
 
-					# fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
+					fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
 
-					# rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
+					rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
 
-					# rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
+					rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
 
-					# rgb_final.append(rgb_fine)
-					# depth_final.append(depth_map_fine)
+					rgb_final.append(rgb_fine)
+					depth_final.append(depth_map_fine)
 
-					# del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, ray_direction_c, ray_direction_f, rgb_fine, depth_map_fine, weights_fine
+					del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, ray_direction_c, ray_direction_f, rgb_fine, depth_map_fine, weights_fine
 
 				rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 				rgb_final = (torch.clip(torch.permute(rgb_final, (2, 0, 1)), 0, 1)*255.0).to(torch.uint8)
@@ -309,8 +309,8 @@ if __name__ == '__main__':
 
 			show(imgs=rgb_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
 			show(imgs=depth_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
-			del rgb_final, depth_final, rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, view_direction
-			# del rgb_final, depth_final
+			# del rgb_final, depth_final, rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, view_direction
+			del rgb_final, depth_final
 
 		torch.save({
 					'epoch': epoch,

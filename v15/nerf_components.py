@@ -157,13 +157,13 @@ class NerfComponents:
 		# Inverse transform uniform dist -> required PDF
 		# Searchsorted will give indices which can be interprted as 
 		# which t_vals helps in generating the density
-		uniform_sample = torch.rand(size=(cdf.shape[0], self.num_samples, 1)).to(self.device)
+		uniform_sample = torch.rand(size=(cdf.shape[0], self.num_samples)).to(self.device)
 
 		indices        = torch.searchsorted(cdf, uniform_sample, side='right')
 		
 		# Boundaries, logic not clear
 		below = torch.maximum(torch.zeros_like(indices).to(self.device), indices-1)
-		above = torch.minimum(torch.ones_like(indices).to(self.device)* cdf.shape[-2]-1, indices)
+		above = torch.minimum(torch.ones_like(indices).to(self.device)* cdf.shape[-1]-1, indices)
 		# indices_stack = torch.stack([below, above], dim=-1)
 
 		# Accumulating CDF according to the bound
@@ -173,8 +173,8 @@ class NerfComponents:
 		
 		# Accumulating t_vals_mid according to the bound
 		# cdf_stack = self.gather_cdf_util(cdf, indices_stack)
-		t_vals_mid_gather_below = torch.gather(input=torch.unsqueeze(t_vals_mid, dim=-1), dim=-1, index=below)
-		t_vals_mid_gather_above = torch.gather(input=torch.unsqueeze(t_vals_mid, dim=-1), dim=-1, index=above)
+		t_vals_mid_gather_below = torch.gather(input=t_vals_mid, dim=-1, index=below)
+		t_vals_mid_gather_above = torch.gather(input=t_vals_mid, dim=-1, index=above)
 
 		# Creating sampling points
 		denom = cdf_gather_above - cdf_gather_lower
@@ -190,6 +190,7 @@ class NerfComponents:
 
 		# Finding finer t_vals
 		t_vals_fine = self.inverse_transform_sampling(t_vals_mid, weights)
+
 		# Merging coarse t_vals and fine t_vals
 		t_vals_fine, _ = torch.sort(torch.concat([t_vals, t_vals_fine], dim=-1), dim=-1)
 
@@ -198,7 +199,8 @@ class NerfComponents:
 		rays = torch.unsqueeze(ray_origin, dim=-2) +\
 			   (torch.unsqueeze(ray_direction, dim=-2) * torch.unsqueeze(t_vals_fine, dim=-1))
 		# rays = torch.reshape(rays, (self.batch_size, -1, 32, 3))
-		rays = torch.squeeze(self.encode_position(rays, self.pos_enc_dim), dim=0)
+		# rays = torch.squeeze(self.encode_position(rays, self.pos_enc_dim), dim=0)
+		rays = self.encode_position(rays, self.pos_enc_dim)
 
 		return (rays, t_vals_fine)
 
