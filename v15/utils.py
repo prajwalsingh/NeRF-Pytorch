@@ -43,3 +43,6 @@ def show(imgs, path, label, idx):
     plt.grid(False)
     plt.savefig('{}/{}.png'.format(path, idx))
     plt.close()
+
+def mse2psnr(x):
+	return -10.*torch.log(x)/torch.log(torch.as_tensor(10., dtype=torch.float32))

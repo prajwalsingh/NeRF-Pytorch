@@ -3,15 +3,15 @@ import math
 
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]= '0'
+os.environ["CUDA_VISIBLE_DEVICES"]= '1'
 
 dataset_type    = 'synthetic' # 'synthetic', 'real', 'llff'
 
 if dataset_type == 'synthetic':
-	train_camera_path = 'dataset/nerf_synthetic/lego/transforms_train.json' 
-	val_camera_path   = 'dataset/nerf_synthetic/lego/transforms_val.json' 
-	train_image_path  = 'dataset/nerf_synthetic/lego'
-	val_image_path    = 'dataset/nerf_synthetic/lego'
+	train_camera_path = 'dataset/nerf_synthetic/chair/transforms_train.json' 
+	val_camera_path   = 'dataset/nerf_synthetic/chair/transforms_val.json' 
+	train_image_path  = 'dataset/nerf_synthetic/chair'
+	val_image_path    = 'dataset/nerf_synthetic/chair'
 
 elif (dataset_type == 'real') or (dataset_type == 'llff'):
 	train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
@@ -33,6 +33,7 @@ num_channels = 3
 batch_size   = 1
 epochs       = 5001#10001
 vis_freq     = 10
+ckpt_freq    = 10
 lrsch_step   = 2500#20
 lrsch_gamma  = 0.1#0.99
 

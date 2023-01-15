@@ -12,13 +12,13 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, io
 from nerf_model import NerfNet
 from nerf_components import NerfComponents
-from piq import psnr
+# from piq import psnr
 
 import matplotlib.pyplot as plt
 from matplotlib import style
 from tqdm import tqdm
 from dataloader import NerfDataLoader
-from utils import show
+from utils import show, mse2psnr
 from glob import glob
 from natsort import natsorted
 
@@ -112,10 +112,10 @@ if __name__ == '__main__':
 		os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 		os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
 
-	ckpt_path = 'EXPERIMENT_{}/checkpoints/nerf_1.pth'.format(experiment_num)
+	ckpt_lst = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))
 
-	if os.path.isfile(ckpt_path):
-		ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
+	if len(ckpt_lst)>=1:
+		ckpt_path  = ckpt_lst[-1]
 		checkpoint = torch.load(ckpt_path)
 		nerfnet_coarse.load_state_dict(checkpoint['model_state_dict_coarse'])
 		nerfnet_fine.load_state_dict(checkpoint['model_state_dict_fine'])
@@ -144,7 +144,8 @@ if __name__ == '__main__':
 		for idx, (image, c2wMatrix, focal, direction, near, far) in enumerate(tq, start=1):
 
 			with torch.no_grad():
-				temp_loss_tracker = [0.0]
+				# temp_loss_tracker = [0.0]
+				# temp_psnr_tracker = [0.0]
 				image, c2wMatrix = torch.squeeze(image.to(config.device), dim=0), torch.squeeze(c2wMatrix.to(config.device), dim=0)
 				focal, direction = torch.squeeze(focal.to(config.device), dim=0), torch.squeeze(direction.to(config.device), dim=0)
 				near,  far       = torch.squeeze(near.to(config.device), dim=0), torch.squeeze(far.to(config.device), dim=0)
@@ -189,11 +190,13 @@ if __name__ == '__main__':
 			optimizer_coarse.step()
 			optimizer_fine.step()
 
-			temp_loss_tracker.append(loss.detach().cpu())
+			# temp_loss_tracker.append(loss.detach().cpu())
+			# temp_psnr_tracker.append(mse2psnr(loss).detach().cpu())
 			# train_psnr_tracker.append(psnr(rgb_fine, image).detach().cpu())
-			train_loss_tracker.append(sum(temp_loss_tracker)/len(temp_loss_tracker))
+			train_loss_tracker.append(loss.detach().cpu())
+			train_psnr_tracker.append(mse2psnr(loss).detach().cpu())
 
-			tq.set_description('E: {}, TL: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker)))
+			tq.set_description('E: {}, TL: {:0.3f}, TPSNR: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker), sum(train_psnr_tracker)/len(train_psnr_tracker)))
 			del rgb_coarse, depth_map_coarse, weights_coarse, fine_rays, t_vals_fine, rgb, density, rgb_fine, depth_map_fine, weights_fine, loss, view_direction_c, view_direction_f, direction, near, far, ray_origin, view_direction
 			# del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, loss, view_direction_c, view_direction_f, view_direction
 		# 	# break
@@ -301,7 +304,7 @@ if __name__ == '__main__':
 					rgb_final.append(rgb_fine)
 					depth_final.append(depth_map_fine)
 
-					del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, ray_direction_c, ray_direction_f, rgb_fine, depth_map_fine, weights_fine
+					del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, rgb_fine, depth_map_fine, weights_fine
 
 				rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 				rgb_final = (torch.clip(torch.permute(rgb_final, (2, 0, 1)), 0, 1)*255.0).to(torch.uint8)
@@ -312,17 +315,18 @@ if __name__ == '__main__':
 			# del rgb_final, depth_final, rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, view_direction
 			del rgb_final, depth_final
 
-		torch.save({
-					'epoch': epoch,
-					'model_state_dict_coarse': nerfnet_coarse.state_dict(),
-					# 'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
-					'model_state_dict_fine': nerfnet_fine.state_dict(),
-					'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
-					'optimizer_state_dict_fine': optimizer_fine.state_dict(),
-					# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
-					'scheduler_state_dict_coarse': scheduler_coarse.state_dict(),
-					'scheduler_state_dict_fine': scheduler_fine.state_dict()
-			}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, epoch))
+		if (epoch%config.ckpt_freq)==0:
+			torch.save({
+						'epoch': epoch,
+						'model_state_dict_coarse': nerfnet_coarse.state_dict(),
+						# 'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
+						'model_state_dict_fine': nerfnet_fine.state_dict(),
+						'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
+						'optimizer_state_dict_fine': optimizer_fine.state_dict(),
+						# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
+						'scheduler_state_dict_coarse': scheduler_coarse.state_dict(),
+						'scheduler_state_dict_fine': scheduler_fine.state_dict()
+				}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, epoch))
 
 		with open('EXPERIMENT_{}/log.txt'.format(experiment_num), 'a') as file:
 			# file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}, VL: {:0.3f}, VPSNR: {:0.3f}\n'.\
