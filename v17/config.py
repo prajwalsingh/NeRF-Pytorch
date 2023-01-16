@@ -40,7 +40,9 @@ lrsch_gamma  = 0.1#0.99
 pos_enc_dim  = 10
 dir_enc_dim  = 4
 
-noise_value  = 1.0
+pre_epoch    = 50
+pre_crop     = 0.5
+noise_value  = 0.0
 near_plane   = 2.0
 far_plane    = 6.0
 num_samples  = 64

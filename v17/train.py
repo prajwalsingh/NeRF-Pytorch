@@ -155,7 +155,16 @@ if __name__ == '__main__':
 			image            = image.reshape(-1, 3)
 			direction        = direction.reshape(-1, 3)
 			# random_idx       = torch.randint(low=0, high=config.image_height*config.image_width, size=(config.n_samples,))
-			random_idx       = np.random.choice(a=config.image_height*config.image_width, size=[config.n_samples], replace=False)
+			if epoch < config.pre_epoch:
+				p  = np.ones(shape=(config.image_height, config.image_width), dtype=np.float64)
+				dH = int(0.5 * config.image_height * config.pre_crop)
+				dW = int(0.5 * config.image_width * config.pre_crop)
+				p[config.image_height//2-dH:config.image_height//2+dH+1, config.image_width//2-dW:config.image_width//2+dW+1] = 10.0
+				p = p.reshape(-1)
+				p /= p.sum()
+				random_idx   = np.random.choice(a=config.image_height*config.image_width, size=[config.n_samples], replace=False, p=p)
+			else:
+				random_idx   = np.random.choice(a=config.image_height*config.image_width, size=[config.n_samples], replace=False)
 			image            = image[random_idx]
 			direction        = direction[random_idx]
 			
