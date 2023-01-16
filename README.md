@@ -28,16 +28,33 @@ Implementing NeRF model from scratch
   <center>v11</center>
   </th>
   <tr>
-    <td><center>Chair</center></td>
-    <td><center>Ship</center></td>
-    <td><center>Hotdog</center></td>
+<!--     <td><center>Chair</center></td>
+    <td><center>Ship</center></td> -->
+    <td colspan="3"><center>Hotdog</center></td>
   </tr>
   <tr>
-    <td></td>
-    <td></td>
-    <td>
+<!--     <td></td>
+    <td></td> -->
+    <td colspan="3">
       <img src="https://github.com/prajwalsingh/NeRF/blob/main/results/hotdogv11.gif" width="256px" height="256px"/>
     </td>
+  </tr>
+</table>
+
+
+<table>
+  <th colspan="3">
+  <center>v16</center>
+  </th>
+  <tr>
+    <td><center>Lego</center></td>
+    <td><center>Hotdog</center></td>
+    <td><center>Materials</center></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/prajwalsingh/NeRF/blob/main/results/legov16.gif" width="320px" height="320px"/></td>
+    <td><img src="https://github.com/prajwalsingh/NeRF/blob/main/results/hotdogv16.gif" width="320px" height="320px"/></td>    
+    <td><img src="https://github.com/prajwalsingh/NeRF/blob/main/results/materialsv16.gif" width="320px" height="320px"/></td>
   </tr>
 </table>
 
