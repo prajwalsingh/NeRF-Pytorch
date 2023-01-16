@@ -113,7 +113,8 @@ if __name__ == '__main__':
 	nerf_comp = NerfComponents(height=config.image_height,\
 							   width=config.image_width,\
 							   batch_size=config.batch_size,\
-							   num_samples=config.num_samples,\
+							   num_samples_coarse=config.num_samples,\
+							   num_samples_fine=config.num_samples_fine,\
 							   pos_enc_dim=config.pos_enc_dim,\
 							   dir_enc_dim=config.dir_enc_dim)
 
@@ -129,8 +130,8 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'materials'
-	experiment_num = 1
+	label = 'lego'
+	experiment_num = 3
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if not os.path.isdir('EXPERIMENT_{}/results/'.format(experiment_num)):
@@ -164,13 +165,13 @@ if __name__ == '__main__':
 					ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, base_near, base_far, base_focal)
 				view_direction    = torch.unsqueeze(ray_direction / torch.linalg.norm(ray_direction, ord=2, dim=-1, keepdim=True), dim=1)
 				view_direction_c  = nerf_comp.encode_position(torch.tile(view_direction, [1, config.num_samples, 1]), config.dir_enc_dim)
-				view_direction_f  = nerf_comp.encode_position(torch.tile(view_direction, [1, 2*config.num_samples, 1]), config.dir_enc_dim)
+				view_direction_f  = nerf_comp.encode_position(torch.tile(view_direction, [1, config.num_samples_fine + config.num_samples, 1]), config.dir_enc_dim)
 
 				rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, near=base_near, far=base_far, random_sampling=True)
 
 				rgb, density   = nerfnet_coarse(rays, view_direction_c)
 
-				rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, random_sampling=True)
+				rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, noise_value=config.noise_value, random_sampling=True)
 
 				# rgb_final.append(rgb_coarse)
 				# depth_final.append(depth_map_coarse)
@@ -179,7 +180,7 @@ if __name__ == '__main__':
 
 				rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
 
-				rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, random_sampling=True)
+				rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, noise_value=config.noise_value, random_sampling=True)
 
 				rgb_final.append(rgb_fine)
 				depth_final.append(depth_map_fine)
