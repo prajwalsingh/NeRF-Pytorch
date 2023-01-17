@@ -55,9 +55,14 @@ if __name__ == '__main__':
 															torch.squeeze(base_near.to(config.device), dim=0),\
 															torch.squeeze(base_far.to(config.device), dim=0),\
 															torch.squeeze(base_focal.to(config.device), dim=0)
+
+	print(base_image.shape, base_c2wMatrix.shape, base_direction.shape, base_near, base_far, base_focal)
+	print(base_c2wMatrix)
+
 	base_direction = torch.reshape(base_direction, (-1, 3))
 	# print(image.shape, c2wMatrix.shape)
 	# show(image.to(torch.uint8))
+	
 	nerf_comp = NerfComponents(height=config.image_height,\
 							   width=config.image_width,\
 							   batch_size=config.batch_size,\

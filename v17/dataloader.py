@@ -8,9 +8,10 @@ from natsort import natsorted
 from utils import show
 from torchvision import transforms, io
 from torch.utils.data import Dataset, DataLoader
+from real_llff_data import load_llff_data
 
 class NerfDataLoader(Dataset):
-	def __init__(self, camera_path, imageWidth=128, imageHeight=128, data_path='', dataType='train', pre_height=800, pre_width=800):
+	def __init__(self, camera_path, imageWidth=128, imageHeight=128, data_path='', dataType='train'):
 
 		super(NerfDataLoader, self).__init__()
 
@@ -19,14 +20,16 @@ class NerfDataLoader(Dataset):
 
 		if (config.dataset_type == 'real') or (config.dataset_type == 'llff'):
 
+			images, poses, near_far, _, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, bd_factor=.75, spherify=False, path_zflat=False)
+
 			# Reading the numpy file
 			np_data = np.load(camera_path)
 
 			# Parsing the numpy file
-			near_far     = np_data[..., -2:]
-			camera_param = np_data[..., :-2].reshape(-1, 3, 5) # 3 x 5
-			hwf          = camera_param[..., camera_param.shape[1]-1] # Height, Width, Focal
-			camera_mat   = camera_param[..., :-1] # 3 x 4
+			# near_far     = bds
+			# camera_param = np_data[..., :-2].reshape(-1, 3, 5) # 3 x 5
+			hwf          = poses[..., -1] # Height, Width, Focal
+			camera_mat   = poses[..., :-1] # 3 x 4
 
 			# Parsing the JSON file
 			self.images_path = []
@@ -35,10 +38,9 @@ class NerfDataLoader(Dataset):
 			self.direction  = []
 			self.bounds     = []
 
-			for idx, frame in enumerate(natsorted(glob(data_path+'/*'))):
+			for idx in range(images.shape[0]):
 				# Calculating downscale factor
-				downscale = hwf[idx, 1] / self.imageWidth
-				focal_len = hwf[idx, 2] /downscale
+				focal_len = hwf[idx, 2]
 
 				# Pixel of image
 				x, y = np.meshgrid(
@@ -56,7 +58,7 @@ class NerfDataLoader(Dataset):
 				dirc = np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)
 				self.direction.append(dirc)
 				
-				self.images_path.append(frame)
+				self.images_path.append(images[idx])
 				self.c2wMatrix.append(camera_mat[idx])
 				self.focal.append(focal_len)
 				self.bounds.append(near_far[idx])
@@ -75,8 +77,7 @@ class NerfDataLoader(Dataset):
 			self.bounds      = []
 
 			for frame in json_data['frames']:
-				downscale = pre_width / self.imageWidth
-				focal_len = ((pre_width/2.0)/(math.tan(json_data['camera_angle_x']/2.0)))/downscale # f =  (p/2) / tan(theta/2)
+				focal_len = ((config.pre_width/2.0)/(math.tan(json_data['camera_angle_x']/2.0)))/config.downscale # f =  (p/2) / tan(theta/2)
 
 				# Pixel of image
 				x, y = np.meshgrid(
@@ -104,14 +105,16 @@ class NerfDataLoader(Dataset):
 		return len(self.images_path)
 
 	def __getitem__(self, idx):
-		image     = io.read_image(self.images_path[idx], mode=io.ImageReadMode.RGB).to(torch.float32)/255.0
-		image     = transforms.Resize((self.imageHeight, self.imageWidth))(image)
+		if config.dataset_type == 'synthetic':
+			image     = io.read_image(self.images_path[idx], mode=io.ImageReadMode.RGB).to(torch.float32)/255.0
+			image     = transforms.Resize((self.imageHeight, self.imageWidth))(image)
+		else:
+			image = torch.FloatTensor(self.images_path[idx])
 		c2w       = torch.FloatTensor(self.c2wMatrix[idx])
 		focal     = torch.as_tensor(self.focal[idx], dtype=torch.float32) 
 		direction = torch.FloatTensor(self.direction[idx])
 		near      = torch.as_tensor(self.bounds[idx][0], dtype=torch.float32) 
 		far       = torch.as_tensor(self.bounds[idx][1], dtype=torch.float32) 
-		
 		return (image, c2w, focal, direction, near, far)
 
 if __name__ == '__main__':
