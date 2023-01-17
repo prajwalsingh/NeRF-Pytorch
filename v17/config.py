@@ -47,10 +47,10 @@ use_ndc      = False
 lr           = 5e-4
 num_channels = 3
 batch_size   = 1
-epochs       = 3001#10001
+epochs       = 20001#5001#10001
 vis_freq     = 10
 ckpt_freq    = 10
-lrsch_step   = 2500#20
+lrsch_step   = 10000#2500
 lrsch_gamma  = 0.1#0.99
 
 pos_enc_dim  = 10

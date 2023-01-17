@@ -156,7 +156,8 @@ if __name__ == '__main__':
 			image, c2wMatrix = torch.squeeze(image.to(config.device), dim=0), torch.squeeze(c2wMatrix.to(config.device), dim=0)
 			focal, direction = torch.squeeze(focal.to(config.device), dim=0), torch.squeeze(direction.to(config.device), dim=0)
 			near,  far       = torch.squeeze(near.to(config.device), dim=0), torch.squeeze(far.to(config.device), dim=0)
-			image            = torch.permute(image, (1, 2, 0))
+			if config.dataset_type == 'synthetic':
+				image            = torch.permute(image, (1, 2, 0))
 			image            = image.reshape(-1, 3)
 			direction        = direction.reshape(-1, 3)
 			# random_idx       = torch.randint(low=0, high=config.image_height*config.image_width, size=(config.n_samples,))
@@ -326,7 +327,10 @@ if __name__ == '__main__':
 					del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, rgb_fine, depth_map_fine, weights_fine
 
 				rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
-				rgb_final = (torch.clip(torch.permute(rgb_final, (2, 0, 1)), 0, 1)*255.0).to(torch.uint8)
+				if config.dataset_type == 'synthetic':
+					rgb_final = (torch.clip(torch.permute(rgb_final, (2, 0, 1)), 0, 1)*255.0).to(torch.uint8)
+				else:
+					rgb_final = (torch.clip(rgb_final, 0, 1)*255.0).to(torch.uint8)
 				depth_final = torch.concat(depth_final, dim=0).reshape(config.image_height, config.image_width)
 
 			show(imgs=rgb_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
