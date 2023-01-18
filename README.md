@@ -58,6 +58,16 @@ Implementing NeRF model from scratch
   </tr>
 </table>
 
+<table>
+  <th colspan="2">
+  <center>Final Version (v17) (Special thanks to: [4])</center>
+  </th>
+  <tr>
+    <td><img src="https://github.com/prajwalsingh/NeRF-Pytorch/blob/main/results/nerf_result_1.gif" width="800px" height="800px"/></td>
+    <td><img src="https://github.com/prajwalsingh/NeRF-Pytorch/blob/main/results/nerf_result_2.gif" width="800px" height="800px"/></td>
+  </tr>
+</table>
+
 #### Work in Progress.
 
 ## References:
