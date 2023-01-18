@@ -64,6 +64,8 @@ Implementing NeRF model from scratch
   </th>
   <tr>
     <td><img src="https://github.com/prajwalsingh/NeRF-Pytorch/blob/main/results/nerf_result_1.gif" width="800px" height="800px"/></td>
+  </tr>
+  <tr>
     <td><img src="https://github.com/prajwalsingh/NeRF-Pytorch/blob/main/results/nerf_result_2.gif" width="800px" height="800px"/></td>
   </tr>
 </table>
