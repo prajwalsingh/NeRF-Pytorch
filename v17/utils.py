@@ -37,8 +37,6 @@ def show(imgs, path, label, idx):
     if len(imgs.shape)<3:
         plt.imshow(imgs.cpu().detach().numpy(), cmap='viridis')
     else:
-        if config.dataset_type == 'synthetic':
-            imgs = torch.permute(imgs, (1, 2, 0))
         plt.imshow(imgs.cpu().detach().numpy())
     plt.axis('off')
     plt.grid(False)

@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
 	label = 'fern'
-	experiment_num = 10
+	experiment_num = 6
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if not os.path.isdir('EXPERIMENT_{}/results/'.format(experiment_num)):
@@ -122,36 +122,38 @@ if __name__ == '__main__':
 
 	_, _, bds, render_poses, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, spherify=False)
 
+	hwf        = render_poses[0,:,-1]
+	focal_len  = hwf[2]
+	near_far   = bds[0]
+	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
+	base_near  = torch.as_tensor([near_far[0]], dtype=torch.float32).to(config.device)
+	base_far   = torch.as_tensor([near_far[1]], dtype=torch.float32).to(config.device)
+
+	x, y = np.meshgrid(
+							np.arange(0, config.image_width, dtype=np.float32),
+							np.arange(0, config.image_height, dtype=np.float32),
+							indexing = 'xy'
+						)
+
+	# Pixel to camera coordinates
+	camera_x = (x - (config.image_width  * 0.5))/focal_len
+	camera_y = (y - (config.image_height * 0.5))/focal_len
+
+	# creating a direction vector and normalizing to unit vector
+	# direction of pixels w.r.t local camera origin (0,0,0)
+	base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)).to(config.device)
+
+	base_direction = torch.reshape(base_direction, [-1, 3])
+
 	# print(render_poses.shape)
 	# for i, theta in enumerate(tqdm(np.linspace(0.0, 0.05, 120, endpoint=False))):
-	for i, (base_c2wMatrix, near_far) in enumerate(zip(tqdm(render_poses), bds)):
+	for i, base_c2wMatrix in enumerate(tqdm(render_poses)):
 		with torch.no_grad():
 			# Camera to world matrix
 			# base_c2wMatrix = spherical_pose(theta, 10.0, 4.0).to(config.device)
 			# print(base_c2wMatrix)
 			# base_c2wMatrix = torch.as_tensor(np.array([[ 0.0045,  0.9864, -0.1643, -3.0227],[ 1.0000, -0.0051, -0.0035, -0.3887], [-0.0043, -0.1643, -0.9864, -0.2193]]), dtype=torch.float32).to(config.device)
 			# print(base_c2wMatrix)
-			hwf        = base_c2wMatrix[:, -1]
-			focal_len  = hwf[2]
-			base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
-			base_near  = torch.as_tensor([near_far[0]], dtype=torch.float32).to(config.device)
-			base_far   = torch.as_tensor([near_far[1]], dtype=torch.float32).to(config.device)
-
-			x, y = np.meshgrid(
-									np.arange(0, config.image_width, dtype=np.float32),
-									np.arange(0, config.image_height, dtype=np.float32),
-									indexing = 'xy'
-								)
-
-			# Pixel to camera coordinates
-			camera_x = (x - (config.image_width  * 0.5))/focal_len
-			camera_y = (y - (config.image_height * 0.5))/focal_len
-
-			# creating a direction vector and normalizing to unit vector
-			# direction of pixels w.r.t local camera origin (0,0,0)
-			base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)).to(config.device)
-
-			base_direction = torch.reshape(base_direction, [-1, 3])
 
 			base_c2wMatrix = torch.as_tensor(base_c2wMatrix[:, :-1], dtype=torch.float32).to(config.device)
 

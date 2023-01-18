@@ -108,6 +108,7 @@ class NerfDataLoader(Dataset):
 		if config.dataset_type == 'synthetic':
 			image     = io.read_image(self.images_path[idx], mode=io.ImageReadMode.RGB).to(torch.float32)/255.0
 			image     = transforms.Resize((self.imageHeight, self.imageWidth))(image)
+			image     = torch.permute(image, (1, 2, 0))
 		else:
 			image = torch.FloatTensor(self.images_path[idx])
 		c2w       = torch.FloatTensor(self.c2wMatrix[idx])
