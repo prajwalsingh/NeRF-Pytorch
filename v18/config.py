@@ -28,11 +28,11 @@ if dataset_type == 'synthetic':
 	noise_value  = 0.0
 
 elif (dataset_type == 'real') or (dataset_type == 'llff'):
-	train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-	val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-	train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
-	val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
-	basedir           = 'dataset/nerf_real_360/vasedeck/'
+	train_camera_path = 'dataset/nerf_real_360/pinecone/poses_bounds.npy'
+	val_camera_path   = 'dataset/nerf_real_360/pinecone/poses_bounds.npy'
+	train_image_path  = 'dataset/nerf_real_360/pinecone/images'
+	val_image_path    = 'dataset/nerf_real_360/pinecone/images'
+	basedir           = 'dataset/nerf_real_360/pinecone/'
 	spherify          = True
 
 	# train_camera_path = 'dataset/nerf_llff_data/trex/poses_bounds.npy'
@@ -48,8 +48,8 @@ elif (dataset_type == 'real') or (dataset_type == 'llff'):
 	image_height = int(pre_height/factor)
 	image_width  = int(pre_width/factor)
 	downscale    = pre_width / image_width
-	epochs       = 3000
-	lrsch_step   = 2300
+	epochs       = 3500
+	lrsch_step   = 2500
 	pre_epoch    = 0
 	pre_crop     = 0.5
 	noise_value  = 1.0

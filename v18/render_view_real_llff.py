@@ -69,7 +69,8 @@ if __name__ == '__main__':
 	# jsonPath = 'dataset/nerf_synthetic/ship/transforms_val.json'
 	# with open(jsonPath, 'r') as file:
 	# 	jsonData = json.load(file)
-	rgb_frames = []
+	rgb_frames   = []
+	depth_frames = []
 
 	nerfnet_coarse = NerfNet(depth=config.net_depth, in_feat=config.in_feat, dir_feat=config.dir_feat,\
 					  net_dim=config.net_dim, skip_layer=config.skip_layer).to(config.device)
@@ -100,12 +101,13 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'trex'
-	experiment_num = 6
+	label = 'vasedesk'
+	experiment_num = 7
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if not os.path.isdir('EXPERIMENT_{}/results/'.format(experiment_num)):
-		os.makedirs('EXPERIMENT_{}/results/'.format(experiment_num))
+		os.makedirs('EXPERIMENT_{}/results/rgb'.format(experiment_num))
+		os.makedirs('EXPERIMENT_{}/results/depth'.format(experiment_num))
 
 	if os.path.isfile(ckpt_path):		
 		checkpoint = torch.load(ckpt_path)
@@ -123,7 +125,7 @@ if __name__ == '__main__':
 	_, _, bds, render_poses, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, spherify=config.spherify)
 
 	hwf        = render_poses[0,:,-1]
-	focal_len  = hwf[2]
+	focal_len  = hwf[2]-50
 	near_far   = [0., 1.]#bds[0]
 	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
 	base_near  = torch.as_tensor([near_far[0]], dtype=torch.float32).to(config.device)
@@ -192,19 +194,29 @@ if __name__ == '__main__':
 
 			rgb_final = torch.concat(rgb_final, dim=0).reshape(config.image_height, config.image_width, -1)
 			# rgb_final = torch.permute(rgb_final, (0, 3, 1, 2))
-			# depth_final = torch.concat(depth_final, dim=-2).reshape(config.batch_size, config.image_height, config.image_width)
+			depth_final = torch.concat(depth_final, dim=0).reshape(config.image_height, config.image_width)
 
 			# rgb = torch.permute(rgb, (0, 3, 1, 2))
 			# show(imgs=rgb[:1], path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
 			# show(imgs=depth_map[:1], path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
 			IMG = np.uint8(np.clip(rgb_final.detach().cpu().numpy()*255.0, 0, 255))
+			DEPTH = np.uint8(np.clip(depth_final.detach().cpu().numpy()*255.0, 0, 255))
 			rgb_frames = rgb_frames + [ IMG ]
+			depth_frames = depth_frames + [ DEPTH ]
 			plt.figure(figsize=(9, 9), dpi=96)
 			plt.imshow(IMG)
 			plt.axis('off')
 			plt.grid(False)
-			plt.savefig('EXPERIMENT_{}/results/{}.png'.format(experiment_num, i))
+			plt.savefig('EXPERIMENT_{}/results/rgb/{}.png'.format(experiment_num, i))
+			plt.close()
+			plt.figure(figsize=(9, 9), dpi=96)
+			plt.imshow(DEPTH, cmap='gray')
+			plt.axis('off')
+			plt.grid(False)
+			plt.savefig('EXPERIMENT_{}/results/depth/{}.png'.format(experiment_num, i))
 			plt.close()
 
-	rgb_video = "EXPERIMENT_{}/{}.mp4".format(experiment_num, label)
+	rgb_video = "EXPERIMENT_{}/results/{}_rgb.mp4".format(experiment_num, label)
+	depth_video = "EXPERIMENT_{}/results/{}_depth.mp4".format(experiment_num, label)
 	imageio.mimwrite(rgb_video, rgb_frames, fps=30, quality=7, macro_block_size=None)
+	imageio.mimwrite(depth_video, depth_frames, fps=30, quality=7, macro_block_size=None)
