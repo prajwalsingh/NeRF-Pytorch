@@ -20,7 +20,7 @@ class NerfDataLoader(Dataset):
 
 		if (config.dataset_type == 'real') or (config.dataset_type == 'llff'):
 
-			images, poses, near_far, _, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, bd_factor=.75, spherify=False, path_zflat=False)
+			images, poses, near_far, _, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, bd_factor=.75, spherify=config.spherify)
 
 			# Reading the numpy file
 			np_data = np.load(camera_path)
@@ -55,13 +55,16 @@ class NerfDataLoader(Dataset):
 
 				# creating a direction vector and normalizing to unit vector
 				# direction of pixels w.r.t local camera origin (0,0,0)
-				dirc = np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)
+				# dirc = np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)
+				# Thanks to this person :) [https://github.com/sillsill777]
+				dirc = np.stack([camera_x, -camera_y, -np.ones_like(camera_x)], axis=-1)
 				self.direction.append(dirc)
 				
 				self.images_path.append(images[idx])
 				self.c2wMatrix.append(camera_mat[idx])
 				self.focal.append(focal_len)
 				self.bounds.append(near_far[idx])
+				# self.bounds.append([0., 1.])
 
 		elif config.dataset_type=='synthetic':
 			# Reading the JSON data
@@ -96,7 +99,10 @@ class NerfDataLoader(Dataset):
 				self.direction.append(dirc)
 				self.focal.append(focal_len)
 				imagePath = frame['file_path'].replace('.', data_path)
-				self.images_path.append('{}.png'.format(imagePath))
+				image     = io.read_image('{}.png'.format(imagePath), mode=io.ImageReadMode.RGB).to(torch.float32)/255.0
+				image     = transforms.Resize((self.imageHeight, self.imageWidth))(image)
+				image     = torch.permute(image, (1, 2, 0))
+				self.images_path.append(image)
 				self.c2wMatrix.append(frame['transform_matrix'])
 				self.bounds.append([config.near_plane, config.far_plane])
 
@@ -105,12 +111,7 @@ class NerfDataLoader(Dataset):
 		return len(self.images_path)
 
 	def __getitem__(self, idx):
-		if config.dataset_type == 'synthetic':
-			image     = io.read_image(self.images_path[idx], mode=io.ImageReadMode.RGB).to(torch.float32)/255.0
-			image     = transforms.Resize((self.imageHeight, self.imageWidth))(image)
-			image     = torch.permute(image, (1, 2, 0))
-		else:
-			image = torch.FloatTensor(self.images_path[idx])
+		image     = torch.FloatTensor(self.images_path[idx])
 		c2w       = torch.FloatTensor(self.c2wMatrix[idx])
 		focal     = torch.as_tensor(self.focal[idx], dtype=torch.float32) 
 		direction = torch.FloatTensor(self.direction[idx])

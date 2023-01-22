@@ -27,8 +27,8 @@ class NerfNet(nn.Module):
 			if (i%(self.skip_layer+1)==0) and (i>0):
 				self.layers.append(nn.Sequential(
 								   nn.Linear(in_features=units[i]+in_feat, out_features=units[i+1]),
-								   # nn.ReLU(),
-								   nn.ELU(),
+								   nn.ReLU(),
+								   # nn.ELU(),
 								#    nn.SiLU(),
 								# nn.GELU(),
 								#    nn.InstanceNorm1d(num_features=units[i+1]),
@@ -38,8 +38,8 @@ class NerfNet(nn.Module):
 			else:
 				self.layers.append(nn.Sequential(
 								   nn.Linear(in_features=units[i], out_features=units[i+1]),
-								   # nn.ReLU(),
-								   nn.ELU(),
+								   nn.ReLU(),
+								   # nn.ELU(),
 								#    nn.SiLU(),
 								# nn.GELU(),
 								#    nn.InstanceNorm1d(num_features=units[i+1]),
@@ -57,8 +57,8 @@ class NerfNet(nn.Module):
 		# self.feature = nn.Linear(in_features=net_dim, out_features=net_dim)
 		self.layer_9 = nn.Sequential(
 						nn.Linear(in_features=net_dim+dir_feat, out_features=net_dim//2),
-						# nn.ReLU(),
-						nn.ELU(),
+						nn.ReLU(),
+						# nn.ELU(),
 						# nn.SiLU(),
 						# nn.GELU(),
 						# nn.InstanceNorm1d(num_features=units[i+1]),

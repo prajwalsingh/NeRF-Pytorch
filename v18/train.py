@@ -94,7 +94,7 @@ if __name__ == '__main__':
 								)
 
 	# scheduler_coarse = torch.optim.lr_scheduler.StepLR(optimizer_coarse, step_size=config.lrsch_step, gamma=config.lrsch_gamma, verbose=True)
-	# scheduler_fine   = torch.optim.lr_scheduler.StepLR(optimizer_fine, step_size=config.lrsch_step, gamma=config.lrsch_gamma, verbose=True)
+	# scheduler   = torch.optim.lr_scheduler.StepLR(optimizer, step_size=config.lrsch_step, gamma=config.lrsch_gamma, verbose=True)
 	# scheduler_coarse = torch.optim.lr_scheduler.ExponentialLR(optimizer_coarse, gamma=config.lrsch_gamma, verbose=True)
 	# scheduler_fine   = torch.optim.lr_scheduler.ExponentialLR(optimizer_fine, gamma=config.lrsch_gamma, verbose=True)
 	scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=config.lrsch_gamma, verbose=True)
@@ -363,6 +363,7 @@ if __name__ == '__main__':
 			# scheduler_coarse.step()
 			# scheduler_fine.step()
 			scheduler.step()
+		# scheduler.step()
 		# scheduler_coarse.step()
 		# scheduler_fine.step()
 		# #########################################################################################

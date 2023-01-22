@@ -74,7 +74,7 @@ if __name__ == '__main__':
 	# base_far   = torch.as_tensor([28.0], dtype=torch.float32).to(config.device)
 	datatype   = 'synthetic'
 	# datatype   = 'real'
-	focal_len  = 680.0
+	focal_len  = 600.0
 	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
 	base_near  = torch.as_tensor([2.0], dtype=torch.float32).to(config.device)
 	base_far   = torch.as_tensor([6.0], dtype=torch.float32).to(config.device)
@@ -92,10 +92,7 @@ if __name__ == '__main__':
 	# creating a direction vector and normalizing to unit vector
 	# direction of pixels w.r.t local camera origin (0,0,0)
 
-	if datatype == 'real':
-		base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)).to(config.device)
-	else:
-		base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, -np.ones_like(camera_x)], axis=-1)).to(config.device)
+	base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, -np.ones_like(camera_x)], axis=-1)).to(config.device)
 
 	base_direction = torch.reshape(base_direction, [-1, 3])
 

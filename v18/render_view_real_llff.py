@@ -100,7 +100,7 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'fern'
+	label = 'trex'
 	experiment_num = 6
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
@@ -120,11 +120,11 @@ if __name__ == '__main__':
 		START_EPOCH += 1
 	#########################################################################################
 
-	_, _, bds, render_poses, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, spherify=False)
+	_, _, bds, render_poses, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, spherify=config.spherify)
 
 	hwf        = render_poses[0,:,-1]
 	focal_len  = hwf[2]
-	near_far   = bds[0]
+	near_far   = [0., 1.]#bds[0]
 	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
 	base_near  = torch.as_tensor([near_far[0]], dtype=torch.float32).to(config.device)
 	base_far   = torch.as_tensor([near_far[1]], dtype=torch.float32).to(config.device)
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
 	# creating a direction vector and normalizing to unit vector
 	# direction of pixels w.r.t local camera origin (0,0,0)
-	base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, np.ones_like(camera_x)], axis=-1)).to(config.device)
+	base_direction = torch.FloatTensor(np.stack([camera_x, -camera_y, -np.ones_like(camera_x)], axis=-1)).to(config.device)
 
 	base_direction = torch.reshape(base_direction, [-1, 3])
 

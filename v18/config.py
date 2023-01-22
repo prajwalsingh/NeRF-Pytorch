@@ -3,15 +3,15 @@ import math
 
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 os.environ["CUDA_DEVICE_ORDER"]= "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]= '2'
+os.environ["CUDA_VISIBLE_DEVICES"]= '1'
 
-dataset_type    = 'llff' # 'synthetic', 'real', 'llff'
+dataset_type    = 'real' # 'synthetic', 'real', 'llff'
 
 if dataset_type == 'synthetic':
-	train_camera_path = 'dataset/nerf_synthetic/chair/transforms_train.json' 
-	val_camera_path   = 'dataset/nerf_synthetic/chair/transforms_val.json' 
-	train_image_path  = 'dataset/nerf_synthetic/chair'
-	val_image_path    = 'dataset/nerf_synthetic/chair'
+	train_camera_path = 'dataset/nerf_synthetic/lego/transforms_train.json' 
+	val_camera_path   = 'dataset/nerf_synthetic/lego/transforms_val.json' 
+	train_image_path  = 'dataset/nerf_synthetic/lego'
+	val_image_path    = 'dataset/nerf_synthetic/lego'
 
 	factor       = 2 # factor
 	pre_height   = 800
@@ -23,21 +23,24 @@ if dataset_type == 'synthetic':
 	far_plane    = 6.0
 	epochs       = 3501
 	lrsch_step   = 2500
-	pre_epoch    = 50
+	pre_epoch    = 0
 	pre_crop     = 0.5
 	noise_value  = 0.0
 
 elif (dataset_type == 'real') or (dataset_type == 'llff'):
-	# train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-	# val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
-	# train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
-	# val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
+	train_camera_path = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
+	val_camera_path   = 'dataset/nerf_real_360/vasedeck/poses_bounds.npy'
+	train_image_path  = 'dataset/nerf_real_360/vasedeck/images'
+	val_image_path    = 'dataset/nerf_real_360/vasedeck/images'
+	basedir           = 'dataset/nerf_real_360/vasedeck/'
+	spherify          = True
 
-	train_camera_path = 'dataset/nerf_llff_data/fortress/poses_bounds.npy'
-	val_camera_path   = 'dataset/nerf_llff_data/fortress/poses_bounds.npy'
-	train_image_path  = 'dataset/nerf_llff_data/fortress/images'
-	val_image_path    = 'dataset/nerf_llff_data/fortress/images'
-	basedir           = 'dataset/nerf_llff_data/fortress/'
+	# train_camera_path = 'dataset/nerf_llff_data/trex/poses_bounds.npy'
+	# val_camera_path   = 'dataset/nerf_llff_data/trex/poses_bounds.npy'
+	# train_image_path  = 'dataset/nerf_llff_data/trex/images'
+	# val_image_path    = 'dataset/nerf_llff_data/trex/images'
+	# basedir           = 'dataset/nerf_llff_data/trex/'
+	# spherify          = False
 
 	factor       = 8 # factor
 	pre_height   = 3024
@@ -45,11 +48,11 @@ elif (dataset_type == 'real') or (dataset_type == 'llff'):
 	image_height = int(pre_height/factor)
 	image_width  = int(pre_width/factor)
 	downscale    = pre_width / image_width
-	epochs       = 15001
-	lrsch_step   = 8000
+	epochs       = 3000
+	lrsch_step   = 2300
 	pre_epoch    = 0
 	pre_crop     = 0.5
-	noise_value  = 0.0
+	noise_value  = 1.0
 
 
 device       = 'cuda'
@@ -59,7 +62,7 @@ num_channels = 3
 batch_size   = 1
 vis_freq     = 10
 ckpt_freq    = 10
-lrsch_gamma  = 0.1#0.99
+lrsch_gamma  = 0.1
 
 pos_enc_dim  = 10
 dir_enc_dim  = 4
