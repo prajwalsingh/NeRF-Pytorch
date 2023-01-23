@@ -195,7 +195,8 @@ if __name__ == '__main__':
 			# show(imgs=rgb[:1], path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
 			# show(imgs=depth_map[:1], path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
 			IMG = np.uint8(np.clip(rgb_final.detach().cpu().numpy()*255.0, 0, 255))
-			DEPTH = np.uint8(np.clip(depth_final.detach().cpu().numpy()*255.0, 0, 255))
+			# DEPTH = np.uint8(np.clip(depth_final.detach().cpu().numpy()*255.0, 0, 255))
+			DEPTH = depth_final.detach().cpu().numpy()
 			rgb_frames = rgb_frames + [ IMG ]
 			depth_frames = depth_frames + [ DEPTH ]
 			plt.figure(figsize=(9, 9), dpi=96)
