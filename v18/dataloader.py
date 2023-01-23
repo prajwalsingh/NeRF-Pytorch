@@ -1,3 +1,4 @@
+import cv2
 import json
 import numpy as np
 import torch
@@ -59,8 +60,8 @@ class NerfDataLoader(Dataset):
 				# Thanks to this person :) [https://github.com/sillsill777]
 				dirc = np.stack([camera_x, -camera_y, -np.ones_like(camera_x)], axis=-1)
 				self.direction.append(dirc)
-				
-				self.images_path.append(images[idx])
+				images[idx] = np.uint8(np.clip(images[idx]*255.0, 0, 255))
+				self.images_path.append(np.float32(cv2.resize(images[idx], (self.imageWidth, self.imageHeight)))/255.0)
 				self.c2wMatrix.append(camera_mat[idx])
 				self.focal.append(focal_len)
 				self.bounds.append(near_far[idx])
