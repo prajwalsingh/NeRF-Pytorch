@@ -125,8 +125,8 @@ if __name__ == '__main__':
 	_, _, bds, render_poses, _ = load_llff_data(basedir=config.basedir, factor=config.factor, recenter=True, spherify=config.spherify)
 
 	hwf        = render_poses[0,:,-1]
-	focal_len  = hwf[2]-50
-	near_far   = [0., 1.]#bds[0]
+	focal_len  = hwf[2]
+	near_far   = bds[0]
 	base_focal = torch.as_tensor([focal_len], dtype=torch.float32).to(config.device)
 	base_near  = torch.as_tensor([near_far[0]], dtype=torch.float32).to(config.device)
 	base_far   = torch.as_tensor([near_far[1]], dtype=torch.float32).to(config.device)
