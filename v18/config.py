@@ -48,11 +48,11 @@ elif (dataset_type == 'real') or (dataset_type == 'llff'):
 	image_height = int(pre_height/factor)
 	image_width  = int(pre_width/factor)
 	downscale    = pre_width / image_width
-	epochs       = 3500
+	epochs       = 3501
 	lrsch_step   = 2500
 	pre_epoch    = 0
 	pre_crop     = 0.5
-	noise_value  = 1.0
+	noise_value  = 0.0
 
 
 device       = 'cuda'

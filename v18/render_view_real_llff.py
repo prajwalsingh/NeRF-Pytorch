@@ -101,8 +101,8 @@ if __name__ == '__main__':
 	# 	os.makedirs('EXPERIMENT_{}'.format(experiment_num))
 
 	# os.system('cp *.py EXPERIMENT_{}'.format(experiment_num))
-	label = 'vasedesk'
-	experiment_num = 7
+	label = 'pinecone'
+	experiment_num = 8
 	ckpt_path  = natsorted(glob('EXPERIMENT_{}/checkpoints/nerf_*.pth'.format(experiment_num)))[-1]
 
 	if not os.path.isdir('EXPERIMENT_{}/results/'.format(experiment_num)):
