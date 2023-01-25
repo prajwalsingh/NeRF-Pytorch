@@ -85,8 +85,6 @@ Implementing NeRF model from scratch
   </tr>
 </table>
 
-#### Work in Progress.
-
 ## References:
 
 [1] Computer Graphics and Deep Learning with NeRF using TensorFlow and Keras [![Link](https://pyimagesearch.com/2021/11/17/computer-graphics-and-deep-learning-with-nerf-using-tensorflow-and-keras-part-2/)]
