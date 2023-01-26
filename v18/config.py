@@ -23,7 +23,7 @@ if dataset_type == 'synthetic':
 	far_plane    = 6.0
 	epochs       = 3501
 	lrsch_step   = 2500
-	pre_epoch    = 0
+	pre_epoch    = 50
 	pre_crop     = 0.5
 	noise_value  = 0.0
 
