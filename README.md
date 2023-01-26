@@ -90,7 +90,7 @@ Implementing NeRF model from scratch
 1. Capture a video (forward facing), place it in Image2Pose_NERF/customdataset folder.
 2. Open terminal in that folder and extract frames using [![Stackoverflow](https://stackoverflow.com/a/66524095/5224257)]:
    > ffmpeg -i input.mp4 '%04d.png'
-4. Place the extracted image in extract folder.
+4. Create a folder name 'extract' inside customdataset and place the extracted image in this folder.
 5. Reduce the number of frames using filterimage.py code present in Image2Pose_NERF/customdataset folder.
 6. Open COLMAP, click on new project -> select the customdataset for database and customdataset/images for image path -> save
 7. Now in COLMAP select Reconstruction option -> Auto Reconstruction -> Select workspace as customdataset -> Select image folder as customdataset/images -> select data type as video frames -> check shared intrinsics -> check sparse -> uncheck dense and now click Run. It will create Sparse name folder in customdataset.
