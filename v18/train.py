@@ -50,7 +50,8 @@ if __name__ == '__main__':
 										   batch_size=config.batch_size, shuffle=True,\
 										   num_workers=8, pin_memory=True, drop_last=False)
 	base_image, base_c2wMatrix, base_focal, base_direction, base_near, base_far = next(iter(val_dataloader))
-	base_c2wMatrix, base_direction, base_near, base_far, base_focal = torch.squeeze(base_c2wMatrix.to(config.device), dim=0),\
+	base_image, base_c2wMatrix, base_direction, base_near, base_far, base_focal = torch.squeeze(base_image.to(config.device), dim=0),\
+															torch.squeeze(base_c2wMatrix.to(config.device), dim=0),\
 															torch.squeeze(base_direction.to(config.device), dim=0),\
 															torch.squeeze(base_near.to(config.device), dim=0),\
 															torch.squeeze(base_far.to(config.device), dim=0),\
@@ -60,6 +61,7 @@ if __name__ == '__main__':
 	print(base_c2wMatrix)
 
 	base_direction = torch.reshape(base_direction, (-1, 3))
+	base_image     = torch.reshape(base_image, (-1, 3))
 	# print(image.shape, c2wMatrix.shape)
 	# show(image.to(torch.uint8))
 	
@@ -214,7 +216,7 @@ if __name__ == '__main__':
 			# temp_psnr_tracker.append(mse2psnr(loss).detach().cpu())
 			# train_psnr_tracker.append(psnr(rgb_fine, image).detach().cpu())
 			train_loss_tracker.append(loss.detach().cpu())
-			train_psnr_tracker.append(mse2psnr(loss).detach().cpu())
+			train_psnr_tracker.append(mse2psnr(torch.mean( torch.square(image - rgb_fine) ) + 1e-6).detach().cpu())
 
 			tq.set_description('E: {}, TL: {:0.3f}, TPSNR: {:0.3f}'.format(epoch, sum(train_loss_tracker)/len(train_loss_tracker), sum(train_psnr_tracker)/len(train_psnr_tracker)))
 			del rgb_coarse, depth_map_coarse, weights_coarse, fine_rays, t_vals_fine, rgb, density, rgb_fine, depth_map_fine, weights_fine, loss, view_direction_c, view_direction_f, direction, near, far, ray_origin, view_direction
@@ -291,13 +293,16 @@ if __name__ == '__main__':
 		# 		tq.set_description('E: {}, VL: {:0.3f}'.format(epoch, sum(val_loss_tracker)/len(val_loss_tracker)))
 		# 		# break
 
+		test_psnr = [0.0]
 		if (epoch%config.vis_freq) == 0:
 			with torch.no_grad():
-				rgb_final, depth_final = [], []				
+				rgb_final, depth_final= [], []
 				# image  = torch.permute(base_image, (0, 2, 3, 1))
 				# image  = image.reshape(config.batch_size, -1, 3)
 
 				for idx  in range(0, config.image_height*config.image_width, config.n_samples):
+					image =  base_image[idx:idx+config.n_samples]
+
 					ray_origin, ray_direction = nerf_comp.get_rays(base_c2wMatrix, base_direction[idx:idx+config.n_samples])
 					if config.use_ndc:
 						ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, base_near, base_far, base_focal)
@@ -321,6 +326,8 @@ if __name__ == '__main__':
 
 					rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, noise_value=config.noise_value, random_sampling=True)
 
+					test_psnr.append( mse2psnr(torch.mean( torch.square(image - rgb_fine) ) + 1e-6 ).detach().cpu())
+
 					rgb_final.append(rgb_fine)
 					depth_final.append(depth_map_fine)
 
@@ -332,6 +339,7 @@ if __name__ == '__main__':
 
 			show(imgs=rgb_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
 			show(imgs=depth_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
+			print('Epoch: {}, Test PSNR: {:0.3f}'.format(epoch, sum(test_psnr)/len(test_psnr)))
 			# del rgb_final, depth_final, rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, view_direction
 			del rgb_final, depth_final
 
@@ -355,9 +363,9 @@ if __name__ == '__main__':
 			# 	format(epoch, sum(train_loss_tracker)/len(train_loss_tracker),\
 			# 	sum(train_psnr_tracker)/len(train_psnr_tracker),\
 			# 	sum(val_loss_tracker)/len(val_loss_tracker), sum(val_psnr_tracker)/len(val_psnr_tracker)))
-			file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}\n'.\
+			file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}, Test PSNR: {:0.3f}\n'.\
 				format(epoch, sum(train_loss_tracker)/len(train_loss_tracker),\
-				sum(train_psnr_tracker)/len(train_psnr_tracker)))
+				sum(train_psnr_tracker)/len(train_psnr_tracker), sum(test_psnr)/len(test_psnr)))
 		
 		if (epoch%config.lrsch_step)==0:
 			# scheduler_coarse.step()
