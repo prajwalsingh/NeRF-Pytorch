@@ -197,6 +197,8 @@ if __name__ == '__main__':
 			IMG = np.uint8(np.clip(rgb_final.detach().cpu().numpy()*255.0, 0, 255))
 			# DEPTH = np.uint8(np.clip(depth_final.detach().cpu().numpy()*255.0, 0, 255))
 			DEPTH = depth_final.detach().cpu().numpy()
+			DEPTH = (DEPTH - np.min(DEPTH)) / (np.max(DEPTH) - np.min(DEPTH))
+			DEPTH = np.uint8(np.clip(DEPTH*255.0, 0, 255))
 			rgb_frames = rgb_frames + [ IMG ]
 			depth_frames = depth_frames + [ DEPTH ]
 			plt.figure(figsize=(9, 9), dpi=96)
