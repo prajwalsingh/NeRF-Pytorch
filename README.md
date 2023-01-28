@@ -98,7 +98,7 @@ Implementing NeRF model from scratch
    > python image2pose.py customdataset/
 9. customdataset folder is final dataset.
 
-## Hyperparameters:
+## Hyperparameters Synthetic:
 <center>
 
 | Parameters  |      Values   |
