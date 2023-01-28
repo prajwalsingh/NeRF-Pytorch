@@ -108,3 +108,5 @@ Implementing NeRF model from scratch
 [3] Nerf Official Colab Notebook [![Link](https://colab.research.google.com/drive/1L6QExI2lw5xhJ-MLlIwpbgf7rxW7fcz3#scrollTo=31sNNVves8C2)]
 
 [4] NeRF PyTorch [![Link](https://github.com/sillsill777/NeRF-PyTorch)] ( Special Thanks :) )
+
+[5] PyTorch Image Quality (PIQ) [![Link](https://piq.readthedocs.io/en/latest/index.html)]
