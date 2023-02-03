@@ -35,8 +35,8 @@ def show(imgs, path, label, idx):
     plt.figure(figsize=(9, 9), dpi=96)
 
     if len(imgs.shape)<3:
-        # plt.imshow(imgs.cpu().detach().numpy(), cmap='viridis')
-        plt.imshow(imgs.cpu().detach().numpy(), cmap='gray')
+        plt.imshow(imgs.cpu().detach().numpy(), cmap='viridis')
+        # plt.imshow(imgs.cpu().detach().numpy(), cmap='gray')
     else:
         plt.imshow(imgs.cpu().detach().numpy())
     plt.axis('off')
