@@ -8,10 +8,10 @@ os.environ["CUDA_VISIBLE_DEVICES"]= '0,1'
 dataset_type    = 'synthetic' # 'synthetic', 'real', 'llff'
 
 if dataset_type == 'synthetic':
-	train_camera_path = 'dataset/nerf_synthetic/lego/transforms_train.json' 
-	val_camera_path   = 'dataset/nerf_synthetic/lego/transforms_test.json' 
-	train_image_path  = 'dataset/nerf_synthetic/lego'
-	val_image_path    = 'dataset/nerf_synthetic/lego'
+	train_camera_path = 'dataset/nerf_synthetic/drums/transforms_train.json' 
+	val_camera_path   = 'dataset/nerf_synthetic/drums/transforms_test.json' 
+	train_image_path  = 'dataset/nerf_synthetic/drums'
+	val_image_path    = 'dataset/nerf_synthetic/drums'
 
 	factor       = 1 # factor
 	pre_height   = 800
@@ -21,8 +21,8 @@ if dataset_type == 'synthetic':
 	downscale    = pre_width / image_width
 	near_plane   = 2.0
 	far_plane    = 6.0
-	epochs       = 4501
-	lrsch_step   = 3900
+	epochs       = 5501
+	lrsch_step   = 4900
 	pre_epoch    = 50
 	pre_crop     = 0.5
 	noise_value  = 0.0

@@ -348,7 +348,7 @@ if __name__ == '__main__':
 						'scheduler_state_dict': scheduler.state_dict(),
 						# 'scheduler_state_dict_coarse': scheduler_coarse.state_dict(),
 						# 'scheduler_state_dict_fine': scheduler_fine.state_dict()
-				}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, epoch))
+				}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, 'all'))
 
 		with open('EXPERIMENT_{}/log.txt'.format(experiment_num), 'a') as file:
 			# file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}, VL: {:0.3f}, VPSNR: {:0.3f}\n'.\
