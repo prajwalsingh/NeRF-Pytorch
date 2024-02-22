@@ -107,16 +107,6 @@ if __name__ == '__main__':
 	nerfnet_fine   = NerfNet(depth=args.net_depth, in_feat=args.in_feat, dir_feat=args.dir_feat,\
 					  net_dim=args.net_dim, skip_layer=args.skip_layer)
 
-	# if os.getenv("LOCAL_RANK", '0') == '0':
-
-	# 	global save_path 
-
-	# 	dir_info  = natsorted(glob('run/*_experiment*'))
-
-	# 	if len(dir_info)==0:
-	# 		experiment_num = 1
-	# 	else:
-	# 		experiment_num = int(os.path.split(dir_info[-1])[-1].split('_')[0]) + 1
 		
 	save_path = 'run/{}_experiment_{}'.format(args.experiment_num, args.dataset_name)
 
@@ -155,79 +145,3 @@ if __name__ == '__main__':
 	trainer.fit(model=light_network,\
 			 	datamodule=data_loader)
 
-	# if (epoch%args.vis_freq) == 0:
-	# 	with torch.no_grad():
-	# 		rgb_final, depth_final = [], []				
-	# 		# image  = torch.permute(base_image, (0, 2, 3, 1))
-	# 		# image  = image.reshape(args.batch_size, -1, 3)
-
-	# 		for idx  in range(0, args.image_height*args.image_width, args.n_samples):
-	# 			ray_origin, ray_direction = nerf_comp.get_rays(base_c2wMatrix, base_direction[idx:idx+args.n_samples])
-	# 			if args.use_ndc:
-	# 				ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction, base_near, base_far, base_focal)
-	# 			view_direction    = torch.unsqueeze(ray_direction / torch.linalg.norm(ray_direction, ord=2, dim=-1, keepdim=True), dim=1)
-	# 			view_direction_c  = nerf_comp.encode_position(torch.tile(view_direction, [1, args.num_samples, 1]), args.dir_enc_dim)
-	# 			view_direction_f  = nerf_comp.encode_position(torch.tile(view_direction, [1, args.num_samples_fine + args.num_samples, 1]), args.dir_enc_dim)
-	# 			# ray_origin, ray_direction = nerf_comp.ndc_rays(ray_origin, ray_direction)
-
-	# 			rays, t_vals     = nerf_comp.sampling_rays(ray_origin=ray_origin, ray_direction=ray_direction, near=base_near, far=base_far, random_sampling=True)
-
-	# 			rgb, density   = nerfnet_coarse(rays, view_direction_c)
-
-	# 			rgb_coarse, depth_map_coarse, weights_coarse = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals, noise_value=args.noise_value, random_sampling=True)
-
-	# 			# rgb_final.append(rgb_coarse)
-	# 			# depth_final.append(depth_map_coarse)
-
-	# 			fine_rays, t_vals_fine = nerf_comp.sampling_fine_rays(ray_origin=ray_origin, ray_direction=ray_direction, t_vals=t_vals, weights=weights_coarse)
-
-	# 			rgb, density   = nerfnet_fine(fine_rays, view_direction_f)
-
-	# 			rgb_fine, depth_map_fine, weights_fine = nerf_comp.render_rgb_depth(rgb=rgb, density=density, rays_d=ray_direction, t_vals=t_vals_fine, noise_value=args.noise_value, random_sampling=True)
-
-	# 			rgb_final.append(rgb_fine)
-	# 			depth_final.append(depth_map_fine)
-
-	# 			del rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, rgb_fine, depth_map_fine, weights_fine
-
-	# 		rgb_final = torch.concat(rgb_final, dim=0).reshape(args.image_height, args.image_width, -1)
-	# 		rgb_final = (torch.clip(rgb_final, 0, 1)*255.0).to(torch.uint8)
-	# 		depth_final = torch.concat(depth_final, dim=0).reshape(args.image_height, args.image_width)
-
-	# 	show(imgs=rgb_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='img', idx=epoch)
-	# 	show(imgs=depth_final, path='EXPERIMENT_{}/train'.format(experiment_num), label='depth', idx=epoch)
-	# 	# del rgb_final, depth_final, rgb_coarse, depth_map_coarse, weights_coarse, rgb, density, view_direction_c, view_direction_f, view_direction
-	# 	del rgb_final, depth_final
-
-	# if (epoch%args.ckpt_freq)==0:
-	# 	torch.save({
-	# 				'epoch': epoch,
-	# 				'model_state_dict_coarse': nerfnet_coarse.state_dict(),
-	# 				# 'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
-	# 				'model_state_dict_fine': nerfnet_fine.state_dict(),
-	# 				'optimizer_state_dict': optimizer.state_dict(),
-	# 				# 'optimizer_state_dict_coarse': optimizer_coarse.state_dict(),
-	# 				# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
-	# 				# 'optimizer_state_dict_fine': optimizer_fine.state_dict(),
-	# 				'scheduler_state_dict': scheduler.state_dict(),
-	# 				# 'scheduler_state_dict_coarse': scheduler_coarse.state_dict(),
-	# 				# 'scheduler_state_dict_fine': scheduler_fine.state_dict()
-	# 		}, 'EXPERIMENT_{}/checkpoints/nerf_{}.pth'.format(experiment_num, 'all'))
-
-	# with open('EXPERIMENT_{}/log.txt'.format(experiment_num), 'a') as file:
-	# 	# file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}, VL: {:0.3f}, VPSNR: {:0.3f}\n'.\
-	# 	# 	format(epoch, sum(train_loss_tracker)/len(train_loss_tracker),\
-	# 	# 	sum(train_psnr_tracker)/len(train_psnr_tracker),\
-	# 	# 	sum(val_loss_tracker)/len(val_loss_tracker), sum(val_psnr_tracker)/len(val_psnr_tracker)))
-	# 	file.write('Epoch: {}, TL: {:0.3f}, TPSNR: {:0.3f}\n'.\
-	# 		format(epoch, sum(train_loss_tracker)/len(train_loss_tracker),\
-	# 		sum(train_psnr_tracker)/len(train_psnr_tracker)))
-	
-	# if (epoch%args.lrsch_step)==0:
-	# 	# scheduler_coarse.step()
-	# 	# scheduler_fine.step()
-	# 	scheduler.step()
-	# # scheduler.step()
-	# # scheduler_coarse.step()
-	# # scheduler_fine.step()
-	# # #########################################################################################
